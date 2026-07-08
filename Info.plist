@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Ripsaw HD Viewer</string>
+	<key>CFBundleDisplayName</key>
+	<string>Ripsaw HD Viewer</string>
+	<key>CFBundleIdentifier</key>
+	<string>local.grio.ripsaw-hd-viewer</string>
+	<key>CFBundleExecutable</key>
+	<string>RipsawHDViewer</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Shows the video feed from your Razer Ripsaw HD capture card.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Plays the HDMI audio captured by your Razer Ripsaw HD through your speakers.</string>
+</dict>
+</plist>

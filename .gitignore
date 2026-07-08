@@ -1,0 +1,5 @@
+build/
+dist/
+.DS_Store
+.claude/
+assets/AppIcon.iconset/
