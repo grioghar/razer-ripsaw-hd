@@ -156,7 +156,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             backing: .buffered, defer: false)
         window.title = "Razer Ripsaw HD"
         window.contentAspectRatio = NSSize(width: 16, height: 9)
-        window.minSize = NSSize(width: 720, height: 405)
         window.collectionBehavior = [.fullScreenPrimary]
         window.acceptsMouseMovedEvents = true
         let content = window.contentView!
@@ -222,7 +221,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                          target: self, action: #selector(adjustmentsChanged))
         s.isContinuous = true
         s.controlSize = .small
-        s.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        // Flexible width: the sliders absorb window resizes so the rail scales
+        // with the window instead of clipping at the edges.
+        s.widthAnchor.constraint(greaterThanOrEqualToConstant: 64).isActive = true
+        s.widthAnchor.constraint(lessThanOrEqualToConstant: 150).isActive = true
+        s.setContentHuggingPriority(NSLayoutConstraint.Priority(1), for: .horizontal)
         return s
     }
 
@@ -300,6 +303,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         railView.translatesAutoresizingMaskIntoConstraints = false
         let content = window.contentView!
         content.addSubview(railView)
+        let growWithWindow = railView.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -48)
+        growWithWindow.priority = NSLayoutConstraint.Priority(400)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: railView.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: railView.trailingAnchor),
@@ -307,7 +312,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             stack.bottomAnchor.constraint(equalTo: railView.bottomAnchor),
             railView.centerXAnchor.constraint(equalTo: content.centerXAnchor),
             railView.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -16),
+            // Rail tracks the window width between the sliders' min/max bounds,
+            // and may never overflow the window.
+            growWithWindow,
+            railView.widthAnchor.constraint(lessThanOrEqualTo: content.widthAnchor, constant: -24),
+            contrastSlider.widthAnchor.constraint(equalTo: brightnessSlider.widthAnchor),
+            saturationSlider.widthAnchor.constraint(equalTo: brightnessSlider.widthAnchor),
         ])
+        updateMinWindowSize()
+    }
+
+    /// The window may never shrink below the rail's minimum width, so the
+    /// controls pop out fully instead of being clipped at the edges.
+    private func updateMinWindowSize() {
+        railView.layoutSubtreeIfNeeded()
+        let minRail = railView.fittingSize.width
+        let minWidth = minRail + 24
+        window.contentMinSize = NSSize(width: minWidth, height: minWidth * 9 / 16)
+        // If the window is already smaller (e.g. from a previous session), grow it.
+        if let content = window.contentView, content.frame.width < minWidth {
+            var frame = window.frame
+            let delta = minWidth - content.frame.width
+            frame.size.width += delta
+            frame.size.height += delta * 9 / 16
+            window.setFrame(frame, display: true)
+        }
     }
 
     private func buildNoSignalField() {
@@ -549,6 +578,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         if let active = device.formats.firstIndex(of: device.activeFormat) {
             formatPopup.selectItem(at: active)
         }
+        updateMinWindowSize() // popup width changed with real format names
 
         updateTitle()
         showRail() // flash the rail once so it's discoverable
